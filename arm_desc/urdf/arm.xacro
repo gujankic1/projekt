@@ -1,0 +1,99 @@
+<?xml version="1.0" ?>
+
+<robot name="arm" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+ <!-- BGN - Include -->
+
+  <xacro:include filename="$(find arm_desc)/urdf/links_joints.xacro"/>
+  <xacro:include filename="$(find arm_desc)/urdf/robot_parameters.xacro" />
+
+ <!-- END - Include -->
+  
+ <!-- BGN - Robot description -->
+
+
+    <m_link_virtual name="base_link" origin_rpy="0 0 0" origin_xyz="0 0 0"/>
+
+    <m_joint name="basepos_q1" type="prismatic" axis_xyz="0 0 1" origin_rpy="0 0 1.57"
+		origin_xyz="0 0 0" parent="base_link" child="virtual_0_q1" limit_e="1000.0"
+		limit_l="-3" limit_u="3" limit_v="0.5"/>
+
+    <m_link_virtual name="virtual_0_q1" origin_rpy="0 0 0" origin_xyz="0 0 0"/>
+
+    <m_joint name="basepos_q2" type="prismatic" axis_xyz="0 0 1" origin_rpy="1.57 -1.57 0"
+		origin_xyz="0 0 0" parent="virtual_0_q1" child="virtual_q1_q2" limit_e="1000.0"
+		limit_l="-3" limit_u="3" limit_v="0.5"/>
+
+    <m_link_virtual name="virtual_q1_q2" origin_rpy="0 0 0" origin_xyz="0 0 0"/>
+
+    <m_joint_fixed name="body_height" origin_rpy="1.57 0 0" origin_xyz="0 ${-lt} 0"
+		parent="virtual_q1_q2" child="body"/>
+
+    <m_link_cylinder name="body" origin_rpy="0 0 0" origin_xyz="0 0 -0.75" 
+		radius="0.075" length="${lt}"/>
+
+    <m_joint name="bodyaxis_q3" type="revolute" axis_xyz="0 0 1" origin_rpy="0 0 1.57"
+		origin_xyz="0 0 0" parent="body" child="chest" limit_e="1000.0"
+		limit_l="0" limit_u="6.28" limit_v="0.5"/>
+
+    <m_link_box name="chest" origin_rpy="0 0 0" origin_xyz="0 ${-lm/2} 0" size="0.1 ${lm} 0.1"/>
+
+    <m_joint name="shoulder_q4" type="revolute" axis_xyz="0 0 1" origin_rpy="1.57 -1.57 0"
+		origin_xyz="0 ${-lm} 0" parent="chest" child="virtual_q4_q5" limit_e="1000.0"
+		limit_l="-1.57" limit_u="1.57" limit_v="0.5"/>
+
+    <m_link_virtual name="virtual_q4_q5" origin_rpy="0 0 0" origin_xyz="0 ${-lm/2} 0"/>
+
+    <m_joint name="shoulder_q5" type="revolute" axis_xyz="0 0 1" origin_rpy="1.57 -1.57 0"
+		origin_xyz="0 0 0" parent="virtual_q4_q5" child="virtual_q5_q6" limit_e="1000.0"
+		limit_l="-1.57" limit_u="1.57" limit_v="0.5"/>
+
+    <m_link_virtual name="virtual_q5_q6" origin_rpy="0 0 0" origin_xyz="0 0 0"/>
+
+    <m_joint name="shoulder_q6" type="revolute" axis_xyz="0 0 1" origin_rpy="1.57 0 0"
+		origin_xyz="0 0 0" parent="virtual_q5_q6" child="upperarm" limit_e="1000.0"
+		limit_l="-2.041" limit_u="0.785" limit_v="0.5"/>
+
+    <m_link_cylinder name="upperarm" origin_rpy="0 1.57 0" origin_xyz="${lf/2} 0 0" 
+		radius="0.05" length="${lf}"/>
+
+    <m_joint name="elbow_q7" type="revolute" axis_xyz="0 0 1" origin_rpy="0 0 1.57"
+		origin_xyz="${lf} 0 0" parent="upperarm" child="lowerarm" limit_e="1000.0"
+		limit_l="-2.355" limit_u="0" limit_v="0.5"/>
+
+    <m_link_cylinder name="lowerarm" origin_rpy="1.57 0 0" origin_xyz="0 ${-la/2} 0" 
+		radius="0.035" length="${la}"/>
+
+    <m_joint name="wrist_q8" type="revolute" axis_xyz="0 0 1" origin_rpy="1.57 -1.57 0"
+		origin_xyz="0 ${-la} 0" parent="lowerarm" child="virtual_q8_q9" limit_e="1000.0"
+		limit_l="-1.57" limit_u="1.57" limit_v="0.5"/>
+
+    <m_link_virtual name="virtual_q8_q9" origin_rpy="0 0 0" origin_xyz="0 0 0"/>
+
+    <m_joint name="wrist_q9" type="revolute" axis_xyz="0 0 1" origin_rpy="1.57 0 0"
+		origin_xyz="0 0 0" parent="virtual_q8_q9" child="palm" limit_e="1000.0"
+		limit_l="-1.57" limit_u="1.57" limit_v="0.5"/>
+
+    <m_link_box name="palm" origin_rpy="0 0 0" origin_xyz="0 ${lk/2} 0" size="0.02 ${lk} ${lk}"/>
+
+    <m_joint_fixed name="finger_fixed_endpoint" origin_rpy="0 0 0" origin_xyz="0 ${lk+lu} 0"
+		parent="palm" child="finger_fixed"/>
+
+    <m_link_box name="finger_fixed" origin_rpy="0 0 0" origin_xyz="0 ${-lu/2} 0" 
+		size="0.02 ${lu} 0.02"/>
+
+    <m_joint name="finger_moving_joint" type="revolute" axis_xyz="0 0 1" origin_rpy="0 0 0.785"
+		origin_xyz="0 ${lk} 0" parent="palm" child="finger_moving" limit_e="1000.0"
+		limit_l="-0.785" limit_u="0" limit_v="0.5"/>
+
+    <m_link_box name="finger_moving" origin_rpy="0 0 0" origin_xyz="0 ${lu/2} 0" 
+		size="0.02 ${lu} 0.02"/>
+
+    <m_joint_fixed name="finger_moving_endpoint" origin_rpy="0 0 0" origin_xyz="0 ${lu} 0"
+		parent="finger_moving" child="finger_moving_virtual_end"/>
+
+    <m_link_virtual name="finger_moving_virtual_end" origin_rpy="0 0 0" origin_xyz="0 0 0"/>
+
+  <!-- END - Robot description -->
+
+</robot>
